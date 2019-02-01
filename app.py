@@ -9,8 +9,8 @@ class RandomProcesses:
         self.n = 100
         self.q = 5
         self.sv = np.empty(shape=self.n)
-        self.matrixRP = [[0.]*self.n for _ in range(self.q)]
-        self.r = np.array([1.5, 1.0, 1.0/2.0, 1.0/4.0, 1.0/8.0], float)
+        self.matrixRP = [[0.] * self.n for _ in range(self.q)]
+        self.r = np.array([1.5, 1.0, 1.0 / 2.0, 1.0 / 4.0, 1.0 / 8.0], float)
         # self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
 
     def R(self, h, r):
@@ -69,7 +69,7 @@ class RandomProcesses:
 
     def plots_of_cov(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
-        R = [0.]*self.n
+        R = [0.] * self.n
         for i in range(0, self.q):
             for h in range(0, self.n):
                 R[h] = self.R(h, self.r[i])
@@ -78,6 +78,7 @@ class RandomProcesses:
             pl.plot(x, R)
             pl.title('Ковариационная функция, r = ' + str(self.r[i]))
             pl.show()
+
 
 rp = RandomProcesses()
 # rp.write_rv_in_file()
