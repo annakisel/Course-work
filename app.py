@@ -10,8 +10,8 @@ class RandomProcesses:
         self.q = 5
         self.sv = np.empty(shape=self.n)
         self.matrixRP = [[0.]*self.n for _ in range(self.q)]
-        self.r = np.array([1.0, 1.0/2.0, 1.0/3.0, 1.0/4.0, 1.0/5.0], float)
-        self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
+        self.r = np.array([1.5, 1.0, 1.0/2.0, 1.0/4.0, 1.0/8.0], float)
+        # self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
 
     def R(self, h, r):
         return math.exp(-1 / r * h)
@@ -30,27 +30,26 @@ class RandomProcesses:
     def creating__random_process(self):
         pl.ylabel(r'$eta(t)$')
         pl.xlabel(r'$t$')
-        x = list(range(0, 100))
+        x = np.linspace(0, 100, self.n).reshape(-1, 1)
         for i in range(0, self.q):
             ro = math.exp(-1.0 / self.r[i])
             b1 = -ro
             a0 = math.sqrt(1 - ro * ro)
             self.matrixRP[i][0] = a0 * self.sv[0]
-            for j in range(1, self.n):
+            for j in range(0, self.n):
                 self.matrixRP[i][j] = a0 * self.sv[j] - b1 * self.matrixRP[i][j - 1]
 
             pl.ylabel(r'$eta(t)$')
             pl.xlabel(r'$t$')
             pl.plot(x, self.matrixRP[i])
             pl.axis([0, 110, -3, 3])
-            pl.title('Случайный процесс ' + str(i))
-        pl.show()
+            pl.title('Случайный процесс, r = ' + str(self.r[i]))
+            pl.show()
 
     def semivarams_and_estimates(self):
-        x = list(range(0, 100))
+        x = np.linspace(0, 100, self.n).reshape(-1, 1)
         estimate = [0.] * self.n
         semivar = [0.] * self.n
-        print('matrixSP' + str(self.matrixRP))
 
         for j in range(0, self.q):
             for h in range(0, self.n):
@@ -60,7 +59,7 @@ class RandomProcesses:
                     summ += (self.matrixRP[j][i] - self.matrixRP[j][i + h]) * (
                             self.matrixRP[j][i] - self.matrixRP[j][i + h])
                 estimate[h] = summ / 2.0 / (self.n - h)
-            pl.title('Семивариагарамма и ее оценка ' + str(j))
+            pl.title('Семивариагарамма и ее оценка, r = ' + str(self.r[j]))
 
             pl.ylabel(r'$y(t)$')
             pl.xlabel(r'$t$')
@@ -68,9 +67,21 @@ class RandomProcesses:
             pl.plot(x, semivar)
             pl.show()
 
+    def plots_of_cov(self):
+        x = np.linspace(0, 100, self.n).reshape(-1, 1)
+        R = [0.]*self.n
+        for i in range(0, self.q):
+            for h in range(0, self.n):
+                R[h] = self.R(h, self.r[i])
+            pl.ylabel(r'$R(t)$')
+            pl.xlabel(r'$t$')
+            pl.plot(x, R)
+            pl.title('Ковариационная функция, r = ' + str(self.r[i]))
+            pl.show()
 
 rp = RandomProcesses()
 # rp.write_rv_in_file()
 rp.read_rv_from_file()
 rp.creating__random_process()
 rp.semivarams_and_estimates()
+rp.plots_of_cov()
