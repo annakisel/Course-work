@@ -9,8 +9,8 @@ class RandomProcesses:
         self.n = 100
         self.q = 5
         self.sv = np.empty(shape=self.n)
-        self.matrixRP = [[0] * self.n] * self.q
-        self.r = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
+        self.matrixRP = [[0.]*self.n for _ in range(self.q)]
+        self.r = np.array([1.0, 1.0/2.0, 1.0/3.0, 1.0/4.0, 1.0/5.0], float)
         self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
 
     def R(self, h, r):
@@ -28,6 +28,9 @@ class RandomProcesses:
         self.sv = np.fromfile('random-variables.txt', float, self.n, ' ')
 
     def creating__random_process(self):
+        pl.ylabel(r'$eta(t)$')
+        pl.xlabel(r'$t$')
+        x = list(range(0, 100))
         for i in range(0, self.q):
             ro = math.exp(-1.0 / self.r[i])
             b1 = -ro
@@ -36,12 +39,33 @@ class RandomProcesses:
             for j in range(1, self.n):
                 self.matrixRP[i][j] = a0 * self.sv[j] - b1 * self.matrixRP[i][j - 1]
 
-            x = list(range(0, 100))
             pl.ylabel(r'$eta(t)$')
             pl.xlabel(r'$t$')
             pl.plot(x, self.matrixRP[i])
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс ' + str(i))
+        pl.show()
+
+    def semivarams_and_estimates(self):
+        x = list(range(0, 100))
+        estimate = [0.] * self.n
+        semivar = [0.] * self.n
+        print('matrixSP' + str(self.matrixRP))
+
+        for j in range(0, self.q):
+            for h in range(0, self.n):
+                semivar[h] = self.R(0, self.r[j]) - self.R(h, self.r[j])
+                summ = 0
+                for i in range(0, self.n - h):
+                    summ += (self.matrixRP[j][i] - self.matrixRP[j][i + h]) * (
+                            self.matrixRP[j][i] - self.matrixRP[j][i + h])
+                estimate[h] = summ / 2.0 / (self.n - h)
+            pl.title('Семивариагарамма и ее оценка ' + str(j))
+
+            pl.ylabel(r'$y(t)$')
+            pl.xlabel(r'$t$')
+            pl.plot(x, estimate)
+            pl.plot(x, semivar)
             pl.show()
 
 
@@ -49,3 +73,4 @@ rp = RandomProcesses()
 # rp.write_rv_in_file()
 rp.read_rv_from_file()
 rp.creating__random_process()
+rp.semivarams_and_estimates()
