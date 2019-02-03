@@ -10,9 +10,11 @@ class RandomProcesses:
         self.q = 5
         self.sv = np.empty(shape=self.n)
         self.matrixRP = [[0.] * self.n for _ in range(self.q)]
-        self.r = np.array([1.5, 1.0, 1.0 / 2.0, 1.0 / 4.0, 1.0 / 8.0], float)
+        self.r = np.array([1.0, 1.0 / 2.0, 1.0 / 3.0, 1.0 / 4.0, 1.0 / 5.0], float)
         self.z = [0.] * self.n
-        self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
+        self.b = np.array([0.1, 0.1, 0.3, 0.3, 0.2], float)
+        # self.b = np.array([1.0 / 2.0, 1.0 / 2.0, 1.0 / 3.0, 1.0 / 4.0, 1.0 / 5.0], float)
+        self.r_z = [0.] * self.n
 
     def R(self, h, r):
         return math.exp(-1 / r * h)
@@ -43,7 +45,7 @@ class RandomProcesses:
             pl.plot(x, self.matrixRP[i])
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс, r = ' + str(self.r[i]))
-        pl.show()
+            pl.show()
 
     def semivarams_and_estimates(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
@@ -62,7 +64,7 @@ class RandomProcesses:
             pl.xlabel(r'$t$')
             pl.plot(x, estimate)
             pl.plot(x, semivar)
-        pl.show()
+            pl.show()
 
     def plots_of_cov_and_d(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
@@ -105,11 +107,34 @@ class RandomProcesses:
         print('среднее значение: ' + str(self.X_(self.z)) + '\nдисперсия: ' + str(
             self.Dx(self.z)) + '\n')
 
+    def R_z(self):
+        x = np.linspace(0, 100, self.n).reshape(-1, 1)
+        for h in range(0, self.n):
+            for j in range(0, self.q):
+                self.r_z[h] += (self.b[j] * self.b[j] * (1.0 - self.R(h, self.r[j])))
+
+    def estimate_sem_z(self):
+        self.R_z()
+        estimate_s_z = [0.] * self.n
+        x = np.linspace(0, 100, self.n).reshape(-1, 1)
+        for h in range(0, self.n):
+            for j in range(0, self.n - h):
+                estimate_s_z[h] += ((self.z[j] - self.z[j + h]) * (self.z[j] - self.z[j + h]))
+            estimate_s_z[h] /= 2.0
+            estimate_s_z[h] /= (self.n - h)
+        pl.ylabel(r'y(t)$')
+        pl.xlabel(r'$t$')
+        pl.plot(x, self.r_z)
+        pl.plot(x, estimate_s_z)
+        pl.title('Семивариограмма процесса z и ее оценка ')
+        pl.show()
+
 
 rp = RandomProcesses()
 # rp.write_rv_in_file()
 rp.read_rv_from_file()
 rp.creating__random_process()
 rp.semivarams_and_estimates()
-rp.plots_of_cov_and_d()
+# rp.plots_of_cov_and_d()
 rp.z_modelling()
+rp.estimate_sem_z()
