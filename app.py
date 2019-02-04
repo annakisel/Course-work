@@ -45,7 +45,7 @@ class RandomProcesses:
             pl.plot(x, self.matrixRP[i])
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс, w = ' + str(self.w[i]))
-            pl.show()
+        pl.show()
 
     def semivarams_and_estimates(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
@@ -64,7 +64,7 @@ class RandomProcesses:
             pl.xlabel(r'$t$')
             pl.plot(x, estimate, 'C1')
             pl.plot(x, semivar, 'C2')
-            pl.show()
+        pl.show()
 
     def plots_of_cov_and_d(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
@@ -118,7 +118,7 @@ class RandomProcesses:
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
         for h in range(0, self.n):
             for j in range(0, self.q):
-                r_z[h] += (self.b[j] * self.R(h, self.w[j]))
+                r_z[h] += (self.b[j] * self.b[j] * self.R(h, self.w[j]))
         pl.ylabel(r'$eta(t)$')
         pl.xlabel(r'$t$')
         pl.plot(x, r_z)
@@ -147,7 +147,7 @@ rp = RandomProcesses()
 rp.read_rv_from_file()
 rp.creating__random_process()
 rp.semivarams_and_estimates()
-rp.plots_of_cov_and_d()
+# rp.plots_of_cov_and_d()
 rp.z_modelling()
 rp.R_z()
 rp.estimate_sem_z()
