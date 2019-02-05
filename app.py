@@ -8,7 +8,7 @@ class RandomProcesses:
     def __init__(self):
         self.n = 100
         self.q = 5
-        self.sv = np.empty(shape=self.n)
+        self.sv = []
         self.matrixRP = [[0.] * self.n for _ in range(self.q)]
         self.w = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.z = [0.] * self.n
@@ -20,14 +20,28 @@ class RandomProcesses:
         return math.exp(-w * h)
 
     def write_rv_in_file(self):
-        self.sv = np.random.normal(size=self.n)
         f = open('random-variables.txt', 'w+')
-        for i in range(0, self.n):
-            f.write(str(self.sv[i]) + ' ')
+        for j in range(0, self.q):
+            rv = np.random.normal(size=self.n)
+            for i in range(0, self.n):
+                if i != self.n - 1:
+                    f.write(str(rv[i]) + ',')
+                else:
+                    f.write(str(rv[i]))
+            f.write('\n')
         f.close()
 
     def read_rv_from_file(self):
-        self.sv = np.fromfile('random-variables.txt', float, self.n, ' ')
+        f = open('random-variables.txt', 'r')
+        if f.mode == 'r':
+            lines = f.readlines()
+            for line in lines:
+                self.sv.append([float(x) for x in line.split(",")])
+        else:
+            print('file not opened')
+        print('----SV----')
+        for i in range(0, self.q):
+            print(self.sv[i])
 
     def creating__random_process(self):
         pl.ylabel(r'$eta(t)$')
@@ -37,15 +51,15 @@ class RandomProcesses:
             ro = math.exp(-self.w[i])
             b1 = -ro
             a0 = math.sqrt(1 - ro * ro)
-            self.matrixRP[i][0] = a0 * self.sv[0]
+            self.matrixRP[i][0] = a0 * self.sv[i][0]
             for j in range(1, self.n):
-                self.matrixRP[i][j] = a0 * self.sv[j] - b1 * self.matrixRP[i][j - 1]
+                self.matrixRP[i][j] = a0 * self.sv[i][j] - b1 * self.matrixRP[i][j - 1]
             pl.ylabel(r'$eta(t)$')
             pl.xlabel(r'$t$')
             pl.plot(x, self.matrixRP[i])
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс, w = ' + str(self.w[i]))
-        pl.show()
+            pl.show()
 
     def semivarams_and_estimates(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
@@ -64,7 +78,7 @@ class RandomProcesses:
             pl.xlabel(r'$t$')
             pl.plot(x, estimate, 'C1')
             pl.plot(x, semivar, 'C2')
-        pl.show()
+            pl.show()
 
     def plots_of_cov_and_d(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
