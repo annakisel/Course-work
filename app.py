@@ -12,8 +12,8 @@ class RandomProcesses:
         self.matrixRP = [[0.] * self.n for _ in range(self.q)]
         self.w = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.z = [0.] * self.n
-        self.b = np.array([0.1, 0.15, 0.2, 0.3, 0.25], float)
-        # self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
+        # self.b = np.array([0.1, 0.15, 0.2, 0.3, 0.25], float)
+        self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.s_z = [0.] * self.n
 
     def R(self, h, w):
@@ -59,7 +59,7 @@ class RandomProcesses:
             pl.plot(x, self.matrixRP[i])
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс, w = ' + str(self.w[i]))
-            pl.show()
+        pl.show()
 
     def semivarams_and_estimates(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
@@ -78,7 +78,7 @@ class RandomProcesses:
             pl.xlabel(r'$t$')
             pl.plot(x, estimate, 'C1')
             pl.plot(x, semivar, 'C2')
-            pl.show()
+        pl.show()
 
     def plots_of_cov_and_d(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
@@ -161,7 +161,12 @@ rp = RandomProcesses()
 rp.read_rv_from_file()
 rp.creating__random_process()
 rp.semivarams_and_estimates()
-# rp.plots_of_cov_and_d()
+rp.plots_of_cov_and_d()
 rp.z_modelling()
 rp.R_z()
 rp.estimate_sem_z()
+print('сумма квадратов')
+summ = 0
+for i in range(0, rp.q):
+    summ += rp.b[i] * rp.b[i]
+print(summ)
