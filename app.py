@@ -10,7 +10,7 @@ class RandomProcesses:
         self.q = 5
         self.sv = []
         self.matrixRP = [[0.] * self.n for _ in range(self.q)]
-        self.w = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
+        self.w = np.array([1.0, 1/2.0, 1/3.0, 1/4.0, 1/5.0], float)
         self.z = [0.] * self.n
         # self.b = np.array([0.1, 0.15, 0.2, 0.3, 0.25], float)
         self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
@@ -20,7 +20,7 @@ class RandomProcesses:
         return math.exp(-w * h)
 
     def write_rv_in_file(self):
-        f = open('random-variables.txt', 'w+')
+        f = open('random-variables2.txt', 'w+')
         for j in range(0, self.q):
             rv = np.random.normal(size=self.n)
             for i in range(0, self.n):
@@ -32,7 +32,7 @@ class RandomProcesses:
         f.close()
 
     def read_rv_from_file(self):
-        f = open('random-variables.txt', 'r')
+        f = open('random-variables2.txt', 'r')
         if f.mode == 'r':
             lines = f.readlines()
             for line in lines:
@@ -59,7 +59,7 @@ class RandomProcesses:
             pl.plot(x, self.matrixRP[i])
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс, w = ' + str(self.w[i]))
-        pl.show()
+            pl.show()
 
     def semivarams_and_estimates(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
@@ -78,7 +78,7 @@ class RandomProcesses:
             pl.xlabel(r'$t$')
             pl.plot(x, estimate, 'C1')
             pl.plot(x, semivar, 'C2')
-        pl.show()
+            pl.show()
 
     def plots_of_cov_and_d(self):
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
