@@ -10,11 +10,11 @@ class RandomProcesses:
         self.q = 5
         self.sv = []
         self.matrixRP = [[0.] * self.n for _ in range(self.q)]
-        self.w = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
+        self.w = np.array([1.0, 1/2.0, 1/3.0, 1/4.0, 1/5.0], float)
         self.z = [0.] * self.n
         self.b = np.array([0.1, 0.15, 0.2, 0.3, 0.25], float)
         # self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
-        self.s_z = [0.] * self.n
+        self.s_z = [0.] * int(self.n * 2 / 3)
 
     def R(self, h, w):
         return math.exp(-w * h)
@@ -54,19 +54,19 @@ class RandomProcesses:
             self.matrixRP[i][0] = a0 * self.sv[i][0]
             for j in range(1, self.n):
                 self.matrixRP[i][j] = a0 * self.sv[i][j] - b1 * self.matrixRP[i][j - 1]
-            pl.ylabel(r'$eta(t)$')
+            pl.ylabel('$Y$' + str(i) + '$(t)$')
             pl.xlabel(r'$t$')
             pl.plot(x, self.matrixRP[i])
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс, w = ' + str(self.w[i]))
-        pl.show()
+            pl.show()
 
     def semivarams_and_estimates(self):
-        x = np.linspace(0, 100, self.n).reshape(-1, 1)
-        estimate = [0.] * self.n
-        semivar = [0.] * self.n
+        x = np.linspace(0, int(self.n * 2 / 3), int(self.n * 2 / 3)).reshape(-1, 1)
+        estimate = [0.] * int(self.n * 2 / 3)
+        semivar = [0.] * int(self.n * 2 / 3)
         for j in range(0, self.q):
-            for h in range(0, self.n):
+            for h in range(0, int(self.n * 2 / 3)):
                 semivar[h] = self.R(0, self.w[j]) - self.R(h, self.w[j])
                 summ = 0
                 for i in range(0, self.n - h):
@@ -74,7 +74,7 @@ class RandomProcesses:
                             self.matrixRP[j][i] - self.matrixRP[j][i + h])
                 estimate[h] = summ / 2.0 / (self.n - h)
             pl.title('Семивариагарамма и ее оценка, w = ' + str(self.w[j]))
-            pl.ylabel(r'$y(t)$')
+            pl.ylabel('$y$' + str(j) + '$(t)$')
             pl.xlabel(r'$t$')
             pl.plot(x, estimate, 'C1')
             pl.plot(x, semivar, 'C2')
@@ -86,7 +86,7 @@ class RandomProcesses:
         for i in range(0, self.q):
             for h in range(0, self.n):
                 R[h] = self.R(h, self.w[i])
-            pl.ylabel(r'$R(t)$')
+            pl.ylabel('$R$' + str(i) + '$(t)$')
             pl.xlabel(r'$t$')
             pl.plot(x, R)
             pl.title('Ковариационная функция, w = ' + str(self.w[i]))
@@ -112,10 +112,10 @@ class RandomProcesses:
         for h in range(0, self.n):
             for j in range(0, self.q):
                 self.z[h] += (self.b[j] * self.matrixRP[j][h])
-        pl.ylabel(r'$eta(t)$')
+        pl.ylabel('Z(t)')
         pl.xlabel(r'$t$')
         pl.plot(x, self.z)
-        pl.title('Случайный процесс z ')
+        pl.title('Случайный процесс Z(t) ')
         pl.axis([0, 110, None, None])
         pl.show()
         print('-------z process -----------')
@@ -123,7 +123,7 @@ class RandomProcesses:
             self.Dx(self.z)) + '\n')
 
     def S_z(self):
-        for h in range(0, self.n):
+        for h in range(0, int(self.n * 2 / 3)):
             for j in range(0, self.q):
                 self.s_z[h] += (self.b[j] * self.b[j] * (1.0 - self.R(h, self.w[j])))
 
@@ -133,17 +133,17 @@ class RandomProcesses:
         for h in range(0, self.n):
             for j in range(0, self.q):
                 r_z[h] += (self.b[j] * self.b[j] * self.R(h, self.w[j]))
-        pl.ylabel(r'$eta(t)$')
+        pl.ylabel(r'$R(t)$')
         pl.xlabel(r'$t$')
         pl.plot(x, r_z)
-        pl.title('Ковариационная функция процесса z ')
+        pl.title('Ковариационная функция процесса Z(t) ')
         pl.show()
 
     def estimate_sem_z(self):
         self.S_z()
-        estimate_s_z = [0.] * self.n
-        x = np.linspace(0, 100, self.n).reshape(-1, 1)
-        for h in range(0, self.n):
+        estimate_s_z = [0.] * int(self.n * 2 / 3)
+        x = np.linspace(0, int(self.n * 2 / 3), int(self.n * 2 / 3)).reshape(-1, 1)
+        for h in range(0, int(self.n * 2 / 3)):
             for j in range(0, self.n - h):
                 estimate_s_z[h] += ((self.z[j] - self.z[j + h]) * (self.z[j] - self.z[j + h]))
             estimate_s_z[h] /= 2.0
@@ -152,7 +152,7 @@ class RandomProcesses:
         pl.xlabel(r'$t$')
         pl.plot(x, self.s_z, 'C1')
         pl.plot(x, estimate_s_z, 'C2')
-        pl.title('Семивариограмма процесса z и ее оценка ')
+        pl.title('Семивариограмма процесса Z(t) и ее оценка ')
         pl.show()
 
 
