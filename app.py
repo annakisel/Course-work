@@ -10,14 +10,15 @@ class RandomProcesses:
         self.q = 5
         self.sv = []
         self.matrixRP = [[0.] * self.n for _ in range(self.q)]
-        self.w = np.array([1.0, 1/2.0, 1/3.0, 1/4.0, 1/5.0], float)
+        # self.w = np.array([1.0, 1/2.0, 1/3.0, 1/4.0, 1/5.0], float)
+        self.w = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.z = [0.] * self.n
         self.b = np.array([0.1, 0.15, 0.2, 0.3, 0.25], float)
         # self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.s_z = [0.] * int(self.n * 2 / 3)
 
     def R(self, h, w):
-        return math.exp(-w * h)
+        return math.exp(-w * abs(h))
 
     def write_rv_in_file(self):
         f = open('random-variables.txt', 'w+')
@@ -56,7 +57,7 @@ class RandomProcesses:
                 self.matrixRP[i][j] = a0 * self.sv[i][j] - b1 * self.matrixRP[i][j - 1]
             pl.ylabel('$Y$' + str(i) + '$(t)$')
             pl.xlabel(r'$t$')
-            pl.plot(x, self.matrixRP[i])
+            pl.plot(x, self.matrixRP[i], marker='.')
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс, w = ' + str(self.w[i]))
             pl.show()
@@ -114,7 +115,7 @@ class RandomProcesses:
                 self.z[h] += (self.b[j] * self.matrixRP[j][h])
         pl.ylabel('Z(t)')
         pl.xlabel(r'$t$')
-        pl.plot(x, self.z)
+        pl.plot(x, self.z, marker='.')
         pl.title('Случайный процесс Z(t) ')
         pl.axis([0, 110, None, None])
         pl.show()
@@ -155,18 +156,48 @@ class RandomProcesses:
         pl.title('Семивариограмма процесса Z(t) и ее оценка ')
         pl.show()
 
+    def D_before_beta(self, w_j, w_p, t1, t2, h):
+        R = self.R
+        return (4 * R(t1 - t2, w_j) * R(t1 - t2, w_p) - 2 * R(t1 - t2, w_j) * R(t1 - t2 - h, w_p) + R(t1 - t2 - h, w_j)
+                * R(t1 - t2 - h, w_p) - 2 * R(t1 - t2, w_j) * R(t1 - t2 + h, w_p) + 2 * R(t1 - t2 - h, w_j) * R(t1 -
+                t2 + h, w_p) - 2 * R(t1 - t2 - h, w_j) * R(t1 - t2, w_p) + R(t1 - t2 + h, w_j) * R(t1 - t2 + h, w_p) - 2 *
+                R(t1 - t2 + h, w_j) * R(t1 - t2, w_p))
+
+    def D_gamma_z(self):
+        h = 30
+        summ = 0
+        numbers = [50, 75, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+        d_gamma_estimate = [0.] * len(numbers)
+        for count in range(0, len(numbers)):
+            for t1 in range(1, numbers[count] - h):
+                for t2 in range(1, numbers[count] - h):
+                    for j in range(0, self.q):
+                        for p in range(0, self.q):
+                            summ += ((self.b[j] ** 2) * (self.b[p] ** 2) * self.D_before_beta(self.w[j],
+                                                                                                    self.w[p], t1, t2,
+                                                                                                    h))
+            d_gamma_estimate[count] = 1 / (2 * (numbers[count] - h) ** 2) * summ
+            summ = 0
+        print(d_gamma_estimate)
+        pl.ylabel(r'$Dy^(h)$')
+        pl.xlabel(r'$h$')
+        pl.plot(numbers, d_gamma_estimate)
+        pl.title('Зависимость Dy^(t) и n, h =' + str(h))
+        pl.show()
+
 
 rp = RandomProcesses()
 # rp.write_rv_in_file()
 rp.read_rv_from_file()
-rp.creating__random_process()
-rp.semivarams_and_estimates()
-rp.plots_of_cov_and_d()
-rp.z_modelling()
-rp.R_z()
-rp.estimate_sem_z()
-print('сумма квадратов')
-summ = 0
-for i in range(0, rp.q):
-    summ += rp.b[i] * rp.b[i]
-print(summ)
+# rp.creating__random_process()
+# rp.semivarams_and_estimates()
+# rp.plots_of_cov_and_d()
+# rp.z_modelling()
+# rp.R_z()
+# rp.estimate_sem_z()
+# print('сумма квадратов')
+# summ = 0
+# for i in range(0, rp.q):
+#     summ += rp.b[i] * rp.b[i]
+# print(summ)
+rp.D_gamma_z()
