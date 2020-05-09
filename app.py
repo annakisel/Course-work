@@ -166,7 +166,7 @@ class RandomProcesses:
     def D_gamma_z(self):
         h = 30
         summ = 0
-        numbers = [50, 75, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+        numbers = [50,75,100,150,200,250,300,350,400,450,500]
         d_gamma_estimate = [0.] * len(numbers)
         for count in range(0, len(numbers)):
             for t1 in range(1, numbers[count] - h):
@@ -179,10 +179,10 @@ class RandomProcesses:
             d_gamma_estimate[count] = 1 / (2 * (numbers[count] - h) ** 2) * summ
             summ = 0
         print(d_gamma_estimate)
-        pl.ylabel(r'$Dy^(h)$')
-        pl.xlabel(r'$h$')
+        pl.ylabel(r'$Dy\^ (h)$')
+        pl.xlabel(r'$t$')
         pl.plot(numbers, d_gamma_estimate)
-        pl.title('Зависимость Dy^(t) и n, h =' + str(h))
+        pl.title('Зависимость Dy^(h) и t, h =' + str(h))
         pl.show()
 
 
