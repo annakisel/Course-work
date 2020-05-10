@@ -10,19 +10,21 @@ class RandomProcesses:
         self.q = 5
         self.sv = []
         self.matrixRP = [[0.] * self.n for _ in range(self.q)]
-        self.w = np.array([1.0, 1/2.0, 1/3.0, 1/4.0, 1/5.0], float)
+        # self.w = np.array([1.0, 1/2.0, 1/3.0, 1/4.0, 1/5.0], float) # for fist file
+        self.w = np.array([1.0, 1/2.0, 1/4.0, 1/8.0, 1/16.0], float) # for second file
         # self.w = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.z = [0.] * self.n
         self.b = np.array([0.1, 0.15, 0.2, 0.3, 0.25], float)
         # self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.s_z = [0.] * int(self.n * 2 / 3)
-        self.w0 = 1
+        # self.w0 = 1 # for first file
+        self.w0 = 0.5 # for second file
 
     def R(self, h, w):
         return math.exp(-w * abs(h)) * math.cos(self.w0 * h)
 
     def write_rv_in_file(self):
-        f = open('random-variables_for_third_process.txt', 'w+')
+        f = open('random-variables_for_third_process2.txt', 'w+')
         for j in range(0, self.q):
             rv = np.random.normal(size=self.n)
             for i in range(0, self.n):
@@ -34,7 +36,7 @@ class RandomProcesses:
         f.close()
 
     def read_rv_from_file(self):
-        f = open('random-variables_for_third_process.txt', 'r')
+        f = open('random-variables_for_third_process2.txt', 'r')
         if f.mode == 'r':
             lines = f.readlines()
             for line in lines:
@@ -97,9 +99,9 @@ class RandomProcesses:
             pl.xlabel(r'$t$')
             pl.plot(x, R)
             pl.title('Ковариационная функция, w = ' + str(self.w[i]))
-            pl.show()
-            print(str(i) + ' process\nсреднее значение: ' + str(self.X_(self.matrixRP[i])) + '\nдисперсия: ' + str(
-                self.Dx(self.matrixRP[i])) + '\n')
+        pl.show()
+        print(str(i) + ' process\nсреднее значение: ' + str(self.X_(self.matrixRP[i])) + '\nдисперсия: ' + str(
+            self.Dx(self.matrixRP[i])) + '\n')
 
     def X_(self, x):
         s = 0
