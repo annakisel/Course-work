@@ -10,18 +10,19 @@ class RandomProcesses:
         self.q = 5
         self.sv = []
         self.matrixRP = [[0.] * self.n for _ in range(self.q)]
-        # self.w = np.array([1.0, 1/2.0, 1/3.0, 1/4.0, 1/5.0], float)
-        self.w = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
+        self.w = np.array([1.0, 1/2.0, 1/3.0, 1/4.0, 1/5.0], float)
+        # self.w = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.z = [0.] * self.n
         self.b = np.array([0.1, 0.15, 0.2, 0.3, 0.25], float)
         # self.b = np.array([1.0, 2.0, 3.0, 4.0, 5.0], float)
         self.s_z = [0.] * int(self.n * 2 / 3)
+        self.w0 = 1
 
     def R(self, h, w):
-        return math.exp(-w * abs(h))
+        return math.exp(-w * abs(h)) * math.cos(self.w0 * h)
 
     def write_rv_in_file(self):
-        f = open('random-variables.txt', 'w+')
+        f = open('random-variables_for_third_process.txt', 'w+')
         for j in range(0, self.q):
             rv = np.random.normal(size=self.n)
             for i in range(0, self.n):
@@ -33,7 +34,7 @@ class RandomProcesses:
         f.close()
 
     def read_rv_from_file(self):
-        f = open('random-variables.txt', 'r')
+        f = open('random-variables_for_third_process.txt', 'r')
         if f.mode == 'r':
             lines = f.readlines()
             for line in lines:
@@ -50,17 +51,22 @@ class RandomProcesses:
         x = np.linspace(0, 100, self.n).reshape(-1, 1)
         for i in range(0, self.q):
             ro = math.exp(-self.w[i])
-            b1 = -ro
-            a0 = math.sqrt(1 - ro * ro)
-            self.matrixRP[i][0] = a0 * self.sv[i][0]
-            for j in range(1, self.n):
-                self.matrixRP[i][j] = a0 * self.sv[i][j] - b1 * self.matrixRP[i][j - 1]
+            sigma0 = (1 + ro ** 2) / (2 * ro * math.cos(self.w0))
+            sigma12 = sigma0 + math.sqrt(sigma0 ** 2 - 1)
+            A0 = (1 - ro ** 2) * ro * math.cos(self.w0)
+            b2 = ro ** 2
+            b1 = -2 * ro * math.cos(self.w0)
+            a1 = math.sqrt(A0 / sigma12)
+            a0 = -math.sqrt(A0 * sigma12)
+            for j in range(2, self.n):
+                self.matrixRP[i][j] = a0 * self.sv[i][j] + a1 * self.sv[i][j - 1] - b1 * self.matrixRP[i][j - 1] - b2 * \
+                                      self.matrixRP[i][j - 2]
             pl.ylabel('$Y$' + str(i) + '$(t)$')
             pl.xlabel(r'$t$')
             pl.plot(x, self.matrixRP[i], marker='.')
             pl.axis([0, 110, -3, 3])
             pl.title('Случайный процесс, w = ' + str(self.w[i]))
-            pl.show()
+        pl.show()
 
     def semivarams_and_estimates(self):
         x = np.linspace(0, int(self.n * 2 / 3), int(self.n * 2 / 3)).reshape(-1, 1)
@@ -160,13 +166,15 @@ class RandomProcesses:
         R = self.R
         return (4 * R(t1 - t2, w_j) * R(t1 - t2, w_p) - 2 * R(t1 - t2, w_j) * R(t1 - t2 - h, w_p) + R(t1 - t2 - h, w_j)
                 * R(t1 - t2 - h, w_p) - 2 * R(t1 - t2, w_j) * R(t1 - t2 + h, w_p) + 2 * R(t1 - t2 - h, w_j) * R(t1 -
-                t2 + h, w_p) - 2 * R(t1 - t2 - h, w_j) * R(t1 - t2, w_p) + R(t1 - t2 + h, w_j) * R(t1 - t2 + h, w_p) - 2 *
+                                                                                                                t2 + h,
+                                                                                                                w_p) - 2 * R(
+                    t1 - t2 - h, w_j) * R(t1 - t2, w_p) + R(t1 - t2 + h, w_j) * R(t1 - t2 + h, w_p) - 2 *
                 R(t1 - t2 + h, w_j) * R(t1 - t2, w_p))
 
     def D_gamma_z(self):
         h = 7
         summ = 0
-        numbers = [10,50,75,100,150,200,250,300,350]
+        numbers = [10, 50, 75, 100, 150, 200, 250, 300, 350]
         d_gamma_estimate = [0.] * len(numbers)
         for count in range(0, len(numbers)):
             for t1 in range(1, numbers[count] - h):
@@ -174,8 +182,8 @@ class RandomProcesses:
                     for j in range(0, self.q):
                         for p in range(0, self.q):
                             summ += ((self.b[j] ** 2) * (self.b[p] ** 2) * self.D_before_beta(self.w[j],
-                                                                                                    self.w[p], t1, t2,
-                                                                                                    h))
+                                                                                              self.w[p], t1, t2,
+                                                                                              h))
             d_gamma_estimate[count] = 1 / (2 * (numbers[count] - h) ** 2) * summ
             summ = 0
         print(d_gamma_estimate)
@@ -189,15 +197,15 @@ class RandomProcesses:
 rp = RandomProcesses()
 # rp.write_rv_in_file()
 rp.read_rv_from_file()
-# rp.creating__random_process()
-# rp.semivarams_and_estimates()
-# rp.plots_of_cov_and_d()
-# rp.z_modelling()
+rp.creating__random_process()
+rp.semivarams_and_estimates()
+rp.plots_of_cov_and_d()
+rp.z_modelling()
 # rp.R_z()
-# rp.estimate_sem_z()
+rp.estimate_sem_z()
 # print('сумма квадратов')
 # summ = 0
 # for i in range(0, rp.q):
 #     summ += rp.b[i] * rp.b[i]
 # print(summ)
-rp.D_gamma_z()
+# rp.D_gamma_z()

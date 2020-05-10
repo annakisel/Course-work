@@ -166,9 +166,9 @@ class RandomProcesses2:
                 R(t1 - t2 + h, w_j) * R(t1 - t2, w_p))
 
     def D_gamma_z(self):
-        h = 30
+        h = 2
         summ = 0
-        numbers = [50, 75, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+        numbers = [10,50,75,100,150,200,250,300,350]
         d_gamma_estimate = [0.] * len(numbers)
         for count in range(0, len(numbers)):
             for t1 in range(1, numbers[count] - h):
